@@ -1,4 +1,4 @@
-function [feas, z, u, cost] = cftoc_kinematic_bike(N, z0, sampleTime, VehicleParams, IneqConstraints, pursuitPoint)
+function [feas, zOpt, uOpt, JOpt] = cftoc_kinematic_bike(N, z0, sampleTime, VehicleParams, IneqConstraints, pursuitPoint)
 % Function to solve the constrained finite time optimal control problem
 % with a kinematic bicycle model to track a global path
 %
@@ -25,22 +25,25 @@ function [feas, z, u, cost] = cftoc_kinematic_bike(N, z0, sampleTime, VehiclePar
 %                    betaRange - double
 %                    longAccelRange - double
 %
-%       pursuitPoint - double (2x1)?
+%       pursuitPoint - double (2x1)
+%           XY-points to pursue: [x-pos; y-pos]
+%                                [m; m]
 %
 % OUTPUTS:
 %      feas - bool
 %          CFTOC feasibility
 %
-%      z - double (4,N+1)
-%          state trajectory
+%      zOpt - double (4,N+1)
+%             state trajectory
 %
 %      uOpt - double (2,N)
 %          input trajectory
 %      
-%      cost - double
+%      JOpt - double (1,N)
+%          cost
 
 % number of states
-nz = length(z0, 2);
+nz = length(z0);
 % number of inputs [longitudinal accel; steering angle]
 nu = 2;
 
@@ -51,11 +54,11 @@ u = sdpvar(nu, N);
 constraints = z(:,1) == z0;
 
 % initialize the cost
-cost = 0;
+cost = norm(z(1,N)-pursuitPoint(1))^2 + norm(z(2,N)-pursuitPoint(2))^2;
 % loop through the horizon
 for i = 1:N
 %     cost = cost + 
-    constraints = [constaints, ...
+    constraints = [constraints, ...
                    IneqConstraints.zMin <= z(:,i) <= IneqConstraints.zMax, ...         % state constraints
                    IneqConstraints.uMin <= u(:,i) <= IneqConstraints.uMax, ...         % input constraints
                    z(:,i+1) == bike_model(z(:,i), u(:,i), sampleTime, VehicleParams)]; % state dynamics
@@ -67,17 +70,17 @@ for i = 1:N
     end
 end
 
-options = sdpsettings('verbose', 1);
+options = sdpsettings('verbose', 1, 'solver', 'ipopt');
 diagnostics = optimize(constraints, cost, options);
 
 if (diagnostics.problem == 0)
     feas = true;
-    xOpt = double(x);
+    zOpt = double(z);
     uOpt = double(u);
     JOpt = double(cost);
 else
     feas = false;
-    xOpt = [];
+    zOpt = [];
     JOpt = [];
     uOpt = [];
     return
