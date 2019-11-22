@@ -1,6 +1,6 @@
 function [feas, zOpt, uOpt, JOpt] = cftoc_kinematic_bike(N, z0, sampleTime, VehicleParams, IneqConstraints, pursuitPoint)
 % Function to solve the constrained finite time optimal control problem
-% with a kinematic bicycle model to track a global path
+% with a kinematic bicycle model to track a global path.
 %
 % INPUT:
 %       N - double
@@ -54,10 +54,13 @@ u = sdpvar(nu, N);
 constraints = z(:,1) == z0;
 
 % initialize the cost
-cost = norm(z(1,N)-pursuitPoint(1))^2 + norm(z(2,N)-pursuitPoint(2))^2;
+cost = 0;
+% only apply cost for the last 4 points
+for i = N:-1:N-3
+    cost = cost + norm(z(:,i)-pursuitPoint(:,i))^2;
+end
 % loop through the horizon
 for i = 1:N
-%     cost = cost + 
     constraints = [constraints, ...
                    IneqConstraints.zMin <= z(:,i) <= IneqConstraints.zMax, ...         % state constraints
                    IneqConstraints.uMin <= u(:,i) <= IneqConstraints.uMax, ...         % input constraints
@@ -70,7 +73,7 @@ for i = 1:N
     end
 end
 
-options = sdpsettings('verbose', 1, 'solver', 'ipopt');
+options = sdpsettings('verbose', 0, 'solver', 'ipopt');
 diagnostics = optimize(constraints, cost, options);
 
 if (diagnostics.problem == 0)

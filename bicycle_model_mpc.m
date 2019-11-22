@@ -5,10 +5,19 @@ clc,clear,close all
 %%%%%%%%%%%%%%%%
 % Vehicle Path %
 %%%%%%%%%%%%%%%%
-% coordinates to make a straight path in xy-coordinates
-vehiclePath(1,:) = 0:0.1:500; % [m]
-vehiclePath(2,:) = zeros(length(vehiclePath(1,:)), 1); % [m]
-% vehiclePath(2,:) = sin(0.1*vehiclePath(1,:)); % [m]
+% coordinates to make a straight path in xy-coordinates, for a straight
+% line path, set all the yCoordinates to 0
+xCoordinates = 0:50:500;
+% yCoordinates = zeros(1, length(xCoordinates));
+yCoordinates = [0, 10, 10, 15, 20, 30, 30, 15, 10, -5, -10];
+
+% generate linearly interpolated x-coordinates
+xInterpCoordinates = linspace(xCoordinates(1), xCoordinates(end), 500);
+% generate a spline of the y-coordinates
+yInterpCoordinates = spline(xCoordinates, yCoordinates, xInterpCoordinates);
+
+vehiclePath(1,:) = xInterpCoordinates;
+vehiclePath(2,:) = yInterpCoordinates;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Obstacle Bounds/Centroid %
@@ -32,18 +41,20 @@ VehicleParams.trackWidth = 1.78; % [m]
 % sampling time
 sampleTime = 0.1; % [sec]
 % MPC Horizon
-M = 100;
+M = 150;
 % CFTOC Horizon
-N = 10;
+N = 4;
 % initial conditions
 % [x-pos; y-pos; speed; vehicle heading]
-z0 = [0; 0; 50; 0]; % [m; m; m/s; rad]
+z0 = [-3; 2; 30; 0.1]; % [m; m; m/s; rad]
 
 % stop condition
 stopCondition = 10; % [m]
+
+tic
 % do the MPC
 [feas, zOpt, uOpt] = mpc_kinematic_bike(M, N, z0, vehiclePath, sampleTime, VehicleParams, stopCondition);
-
+toc
 %% Do some plotting
 time = 0:sampleTime:sampleTime*length(zOpt)-sampleTime;
 figure(1)

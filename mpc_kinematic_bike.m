@@ -1,6 +1,7 @@
 function [feas, zOpt, uOpt] = mpc_kinematic_bike(M, N, z0, vehiclePath, sampleTime, VehicleParams, stopCondition)
 % Function to facilitate MPC for the kinematic bicycle to track a global
-% path
+% path. The lower state constraints are currently static to force the
+% vehicle to keep moving along the path. 
 % 
 % INPUTS: 
 %       M - double
@@ -45,8 +46,6 @@ nz = length(z0);
 % number of inputs [longitudinal accel; steering angle]
 nu = 2;
 
-% lower state constraints
-IneqConstraints.zMin = [vehiclePath(1,1); -500; 0; -2*pi];
 % upper state constraints
 IneqConstraints.zMax = [vehiclePath(1,end); 500; 80; 2*pi];
 % lower input constraints
@@ -54,9 +53,9 @@ IneqConstraints.uMin = [-0.5; -30*pi/180];
 % upper input constraints
 IneqConstraints.uMax = [0.5; 30*pi/180];
 % limit on difference b/t current and previous steering input
-IneqConstraints.betaRange = 0.2; % [rad]
+IneqConstraints.betaRange = 0.05; % [rad]
 % limit on longitudinal acceleration
-IneqConstraints.longAccelRange = 0.3; % [m/s^2]
+IneqConstraints.longAccelRange = 0.06; % [m/s^2]
 
 zOpt = zeros(nz, M+1);
 uOpt = zeros(nu, M);
@@ -67,13 +66,13 @@ zOpt(:,1) = z0;
 uOpt(:,1) = [0;0];
 for i = 1:M
     % find the point to pursuit
-    pursuitPoint = find_pursuit_point(zOpt, uOpt, VehicleParams, vehiclePath, N*sampleTime);
+    pursuitPoint = find_pursuit_point(zOpt(:,i), uOpt, VehicleParams, vehiclePath, N, sampleTime);
+    % lower state constraint is dynamic
+    IneqConstraints.zMin = [zOpt(1,i); -500; 0; -2*pi];
     % solve the cftoc problem for a kinematic bicycle model and run in "open-loop"
     [feas(i), z, u, cost] = cftoc_kinematic_bike(N, zOpt(:,i), sampleTime, VehicleParams, IneqConstraints, pursuitPoint);
     
     if ~feas(i)
-%         zOpt = [];
-%         uOpt = [];
         disp('Infeasible region reached!');
         return
     end
@@ -85,7 +84,7 @@ for i = 1:M
     % exit the for loop if the vehicle positions are within the stopCondition threshold
     if (abs(zOpt(1,i+1)-vehiclePath(1,end)) <= stopCondition) && (abs(zOpt(2,i+1)-vehiclePath(2,end)) <= stopCondition)
         disp('Reached the end of the path');
-        return
+        break;
     end
 end
 
