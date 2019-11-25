@@ -1,7 +1,9 @@
-function [feas, zOpt, uOpt] = mpc_kinematic_bike(M, N, z0, vehiclePath, sampleTime, VehicleParams, stopCondition)
+function [feas, zOpt, uOpt, JOpt] = mpc_kinematic_bike(M, N, z0, vehiclePath, sampleTime, VehicleParams, stopCondition, ObstacleParams)
 % Function to facilitate MPC for the kinematic bicycle to track a global
 % path. The lower state constraints are currently static to force the
-% vehicle to keep moving along the path. 
+% vehicle to keep moving along the path. An obstacle avoidance cost is
+% incorporated from Professor Borrelli's "Predictive Control of Autonomous
+% Ground Vehicles With Obstacle Avoidance On Slippery Roads". 
 % 
 % INPUTS: 
 %       M - double
@@ -27,6 +29,11 @@ function [feas, zOpt, uOpt] = mpc_kinematic_bike(M, N, z0, vehiclePath, sampleTi
 %           Threshold to stop the MPC when the XY-positions are within the
 %           stopCondition 
 %
+%       ObstacleParams - struct
+%           Contains: centroids - position of centroids in global frame
+%                     bounds - boundaries of the obstacle surrounding the
+%                              centroid in the local obstacle frame
+%
 % OUTPUTS:
 %      feas - bool (1,M)
 %          MPC feasibility
@@ -36,6 +43,9 @@ function [feas, zOpt, uOpt] = mpc_kinematic_bike(M, N, z0, vehiclePath, sampleTi
 %
 %      uOpt - double (2,M)
 %          Closed-loop inputs
+%
+%      JOpt - double (1,M)
+%          Cost from each iteration
 %
 %
 % NOTE: Currently only allows the vehicle to track a global path,
@@ -47,7 +57,7 @@ nz = length(z0);
 nu = 2;
 
 % upper state constraints
-IneqConstraints.zMax = [vehiclePath(1,end); 500; 80; 2*pi];
+IneqConstraints.zMax = [vehiclePath(1,end); 3; 40; 2*pi];
 % lower input constraints
 IneqConstraints.uMin = [-0.5; -30*pi/180];
 % upper input constraints
@@ -59,18 +69,24 @@ IneqConstraints.longAccelRange = 0.06; % [m/s^2]
 
 zOpt = zeros(nz, M+1);
 uOpt = zeros(nu, M);
+JOpt = zeros(1,M);
 feas = false([1, M]);
 
 % initial conditions
 zOpt(:,1) = z0;
 uOpt(:,1) = [0;0];
 for i = 1:M
-    % find the point to pursuit
+    fprintf('Working on MPC Iteration #%d \n', i);
+    % calculate the minimum distance from the vehicle to the object(s) in
+    % the body frame
+    [minDistance, minObstaclePoint] = min_distance_calc(zOpt(:,i), uOpt, VehicleParams, N, sampleTime, ObstacleParams);
+
+    % find the point to pursue
     pursuitPoint = find_pursuit_point(zOpt(:,i), uOpt, VehicleParams, vehiclePath, N, sampleTime);
     % lower state constraint is dynamic
-    IneqConstraints.zMin = [zOpt(1,i); -500; 0; -2*pi];
+    IneqConstraints.zMin = [zOpt(1,i); -3; 0; -2*pi];
     % solve the cftoc problem for a kinematic bicycle model and run in "open-loop"
-    [feas(i), z, u, cost] = cftoc_kinematic_bike(N, zOpt(:,i), sampleTime, VehicleParams, IneqConstraints, pursuitPoint);
+    [feas(i), z, u, cost] = cftoc_kinematic_bike(N, zOpt(:,i), sampleTime, VehicleParams, IneqConstraints, pursuitPoint, minDistance, minObstaclePoint);
     
     if ~feas(i)
         disp('Infeasible region reached!');
@@ -80,6 +96,7 @@ for i = 1:M
     % closed loop predictions
     zOpt(:,i+1) = z(:,2);
     uOpt(:,i) = [u(1,1); u(2,1)];
+    JOpt(:,i) = cost;
     
     % exit the for loop if the vehicle positions are within the stopCondition threshold
     if (abs(zOpt(1,i+1)-vehiclePath(1,end)) <= stopCondition) && (abs(zOpt(2,i+1)-vehiclePath(2,end)) <= stopCondition)

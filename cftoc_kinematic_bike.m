@@ -1,4 +1,4 @@
-function [feas, zOpt, uOpt, JOpt] = cftoc_kinematic_bike(N, z0, sampleTime, VehicleParams, IneqConstraints, pursuitPoint)
+function [feas, zOpt, uOpt, JOpt] = cftoc_kinematic_bike(N, z0, sampleTime, VehicleParams, IneqConstraints, pursuitPoint, minDistance, minObstaclePoint)
 % Function to solve the constrained finite time optimal control problem
 % with a kinematic bicycle model to track a global path.
 %
@@ -29,18 +29,29 @@ function [feas, zOpt, uOpt, JOpt] = cftoc_kinematic_bike(N, z0, sampleTime, Vehi
 %           XY-points to pursue: [x-pos; y-pos]
 %                                [m; m]
 %
+%       minDistance - double (Px1)
+%           Distance from the front of the vehicle to the object bounds in
+%           the body frame. P denotes the number of obstacles that are
+%           present. 
+%
+%       minObstaclePoint - double(Px2)
+%           Location of each obstacle point that is closest to the vehicle
+%           in the global frame
+%               [x-pos, y-pos]
+%               [m, m]
+%
 % OUTPUTS:
 %      feas - bool
 %          CFTOC feasibility
 %
 %      zOpt - double (4,N+1)
-%             state trajectory
+%          State trajectory
 %
 %      uOpt - double (2,N)
-%          input trajectory
+%          Input trajectory
 %      
 %      JOpt - double (1,N)
-%          cost
+%          Cost
 
 % number of states
 nz = length(z0);
@@ -55,12 +66,24 @@ constraints = z(:,1) == z0;
 
 % initialize the cost
 cost = 0;
+
+minDistanceFlag = 1;
+if (all(minDistance) >= 0) && (all(minDistance) <= 1000)
+    minDistanceFlag = 0;
+end
 % only apply cost for the last 4 points
 for i = N:-1:N-3
     cost = cost + norm(z(:,i)-pursuitPoint(:,i))^2;
 end
 % loop through the horizon
 for i = 1:N
+    if ~minDistanceFlag
+%         cost = cost + 10*z(3,i)/(minDistance + 0.00001);
+%         (minObstaclePoint(1,1)-zOpt(2,i))*sin(zOpt(4,i)) + (minObstaclePoint(1,2)-zOpt(1,i))*cos(zOpt(4,i))
+        for j = 1:size(minObstaclePoint,1)
+            cost = cost + 10*z(3,i)/(((-1)*(minObstaclePoint(j,2)-z(2,i))*sin(z(4,i)) + (minObstaclePoint(j,1)-z(1,i))*cos(z(4,i))) + 0.00001);
+        end
+    end
     constraints = [constraints, ...
                    IneqConstraints.zMin <= z(:,i) <= IneqConstraints.zMax, ...         % state constraints
                    IneqConstraints.uMin <= u(:,i) <= IneqConstraints.uMax, ...         % input constraints

@@ -9,11 +9,11 @@ function [pursuitPoint] = find_pursuit_point(zOpt, uOpt, VehicleParams, vehicleP
 %
 % INPUTS: 
 %       zOpt - double (4x1)
-%           State from controller: [x-pos; y-pos; speed; vehicle heading]
+%          State from controller: [x-pos; y-pos; speed; vehicle heading]
 %                                  [m; m; m/s; rad]
 %
 %       uOpt - double (2x1)
-%           Input from controller: [longitudinal accel; steering angle
+%          Input from controller: [longitudinal accel; steering angle
 %                                  [m/s^2; rad]
 %
 %       VehicleParams - struct 
