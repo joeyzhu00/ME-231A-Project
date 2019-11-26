@@ -68,7 +68,7 @@ constraints = z(:,1) == z0;
 cost = 0;
 
 minDistanceFlag = 1;
-if (all(minDistance) >= 0) && (all(minDistance) <= 1000)
+if (all(minDistance) >= 0) & (all(minDistance) <= 1000)
     minDistanceFlag = 0;
 end
 % only apply cost for the last 4 points
@@ -78,8 +78,6 @@ end
 % loop through the horizon
 for i = 1:N
     if ~minDistanceFlag
-%         cost = cost + 10*z(3,i)/(minDistance + 0.00001);
-%         (minObstaclePoint(1,1)-zOpt(2,i))*sin(zOpt(4,i)) + (minObstaclePoint(1,2)-zOpt(1,i))*cos(zOpt(4,i))
         for j = 1:size(minObstaclePoint,1)
             cost = cost + 10*z(3,i)/(((-1)*(minObstaclePoint(j,2)-z(2,i))*sin(z(4,i)) + (minObstaclePoint(j,1)-z(1,i))*cos(z(4,i))) + 0.00001);
         end

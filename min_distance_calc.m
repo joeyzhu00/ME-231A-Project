@@ -44,14 +44,14 @@ function [minDistance, minObstaclePoint] = min_distance_calc(zOpt, uOpt, Vehicle
 %               [m, m]
 %
 
-minDistance = zeros(size(ObstacleParams,1));
-minObstaclePoint = zeros(size(ObstacleParams,1),2);
+minDistance = zeros(size(ObstacleParams,2),1);
+minObstaclePoint = zeros(size(ObstacleParams,2),2);
 % create a Direction Cosine Matrix (DCM) describing rotation of the body frame from the global frame
 Body_DCM_Global = [cos(zOpt(4,1)), (-1)*sin(zOpt(4,1));
                    sin(zOpt(4,1)), cos(zOpt(4,1))];            
 
 % loop through each obstacle
-for p = 1:size(ObstacleParams,1)
+for p = 1:size(ObstacleParams,2)
     % loop through each vertex
     obstacleBounds = zeros(length(ObstacleParams(p).bounds),1);
     % min x position
@@ -96,7 +96,12 @@ for p = 1:size(ObstacleParams,1)
     end
     minDistance(p,1) = min(obstacleDist);
     % element of obstaclePositions that carries the closest obstacle point
-    closestObstacleElement = find(obstacleDist(minDistance == min(obstacleDist)));
+    closestObstacleElement = find(obstacleDist(minDistance(p,1) == min(obstacleDist)));
+    % if there is nothing in the closestObstacleElement then set it equal
+    % to the first vertex 
+    if isempty(closestObstacleElement)
+        closestObstacleElement = 1;
+    end
     minObstaclePoint(p,:) = obstaclePositions(closestObstacleElement,:);
 end
 

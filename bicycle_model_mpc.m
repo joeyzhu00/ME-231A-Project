@@ -28,11 +28,11 @@ ObstacleParams(1).centroids = [110; 0]; % [m]
 % [xMin, xMax, yMin, yMax]
 ObstacleParams(1).bounds = [-1, 1, -0.5, 0.5]; % [m]
 
-ObstacleParams(2).centroids = [110; 0.5]; % [m]
-ObstacleParams(2).bounds = [-1, 1, -0.5, 0.5]; % [m]
-
 ObstacleParams(2).centroids = [110; 1.5]; % [m]
 ObstacleParams(2).bounds = [-1, 1, -0.5, 0.5]; % [m]
+
+ObstacleParams(3).centroids = [120; -1.5]; % [m]
+ObstacleParams(3).bounds = [-1, 1, -1, 1]; % [m]
 
 %%%%%%%%%%%%%%%%%%%%%%
 % Vehicle Dimensions %
