@@ -83,6 +83,10 @@ for i = 1:M
 
     % find the point to pursue
     pursuitPoint = find_pursuit_point(zOpt(:,i), uOpt, VehicleParams, vehiclePath, N, sampleTime);
+    for j = 1:N
+        pursuitPoint(:,j) = [zOpt(1,i)+(j-1)*0.1*30; 0; 30; zOpt(4,i)];
+    end
+    % display(pursuitPoint);
     % lower state constraint is dynamic
     IneqConstraints.zMin = [zOpt(1,i); -3; 0; -2*pi];
     % solve the cftoc problem for a kinematic bicycle model and run in "open-loop"
