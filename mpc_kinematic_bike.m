@@ -22,6 +22,10 @@ function [feas, zOpt, uOpt] = mpc_kinematic_bike(M, N, z0, vehiclePath, sampleTi
 %          Contains: lf - distance from CM to front wheel [m]
 %                    lr - distance from CM to rear wheel [m]
 %                    trackWidth - Axle width [m]
+%                    Cf - Front tire cornering coefficient [N/rad]
+%                    Cr - Rear tire cornering coefficient [N/rad]
+%                    Izz - Yaw Inertia [kg*m^2]
+%                    mass - Vehicle Mass [kg]
 %
 %       stopCondition - double
 %           Threshold to stop the MPC when the XY-positions are within the
@@ -77,9 +81,12 @@ for i = 1:M
         return
     end
     
+    % dynamic bicycle model state update
+    
     % closed loop predictions
-    zOpt(:,i+1) = z(:,2);
     uOpt(:,i) = [u(1,1); u(2,1)];
+    zOpt(:,i+1) = dynamic_bike_model(z(:,2), uOpt(:,i), sampleTime, VehicleParams);
+    
     
     % exit the for loop if the vehicle positions are within the stopCondition threshold
     if (abs(zOpt(1,i+1)-vehiclePath(1,end)) <= stopCondition) && (abs(zOpt(2,i+1)-vehiclePath(2,end)) <= stopCondition)
