@@ -48,9 +48,9 @@ xAccel = yawRate*yVelocity + u(1);
 yAccel = -yawRate*xVelocity + (2/VehicleParams.mass)*(Fyf*cos(u(2)) + Fyr);
 yawAccel = (2/VehicleParams.Izz)*(VehicleParams.lf*Fyf - VehicleParams.lr*Fyr);
 
-zOut(1) = z(1)+ sampleTime*xVelocity + (sampleTime^2)*xAccel;
-zOut(2) = z(2)+ sampleTime*yVelocity + (sampleTime^2)*yAccel;
-zOut(3) = z(3)+ sampleTime*u(1);
-zOut(4) = z(4)+ sampleTime*yawRate + (sampleTime^2)*yawAccel;
+zOut(1) = z(1) + sampleTime*xVelocity + (sampleTime^2)*xAccel;
+zOut(2) = z(2) + sampleTime*yVelocity + (sampleTime^2)*yAccel;
+zOut(3) = z(3) + sampleTime*u(1);
+zOut(4) = z(4) + sampleTime*yawRate + (sampleTime^2)*yawAccel;
 
 end

@@ -79,13 +79,12 @@ for i = 1:M
     if ~feas(i)
         disp('Infeasible region reached!');
         return
-    end
-    
-    % dynamic bicycle model state update
-    
+    end    
     % closed loop predictions
     uOpt(:,i) = [u(1,1); u(2,1)];
-    zOpt(:,i+1) = dynamic_bike_model(z(:,2), uOpt(:,i), sampleTime, VehicleParams);
+%     zOpt(:,i+1) = z(:,2);
+    % update state dynamics with the dynamic bicycle model
+    zOpt(:,i+1) = dynamic_bike_model(zOpt(:,i), uOpt(:,i), sampleTime, VehicleParams);
     
     
     % exit the for loop if the vehicle positions are within the stopCondition threshold
