@@ -1,4 +1,4 @@
-function [feas, zOpt, uOpt, JOpt] = cftoc_kinematic_bike(N, z0, sampleTime, VehicleParams, IneqConstraints, pursuitPoint, minDistance, minObstaclePoint)
+function [feas, zOpt, uOpt, JOpt] = cftoc_kinematic_bike(N, z0, sampleTime, VehicleParams, IneqConstraints, pursuitPoint, minDistance, minObstaclePoint, ObstacleParams)
 % Function to solve the constrained finite time optimal control problem
 % with a kinematic bicycle model to track a global path.
 %
@@ -79,7 +79,18 @@ end
 for i = 1:N
     if ~minDistanceFlag
         for j = 1:size(minObstaclePoint,1)
-            cost = cost + 10*z(3,i)/(((-1)*(minObstaclePoint(j,2)-z(2,i))*sin(z(4,i)) + (minObstaclePoint(j,1)-z(1,i))*cos(z(4,i))) + 0.00001);
+             % min x position
+            objXMin = ObstacleParams(j).bounds(1) + ObstacleParams(j).centroids(1,1);
+            % max x position
+            objXMax = ObstacleParams(j).bounds(2) + ObstacleParams(j).centroids(1,1);
+            % min y position
+            objYCenter = ObstacleParams(j).centroids(2,1);
+            % max y position
+            objYOffset = ObstacleParams(j).bounds(3); 
+            %cost = cost + 10*z(3,i)/(((-1)*(minObstaclePoint(j,2)-z(2,i))*sin(z(4,i)) + (minObstaclePoint(j,1)-z(1,i))*cos(z(4,i))) + 0.00001);
+            constraints = [constraints,
+                implies(objXMin<=z(1,i)<=objXMax, abs(z(2,i)-objYCenter)>=objYOffset)];
+           
         end
     end
     constraints = [constraints, ...
@@ -94,7 +105,7 @@ for i = 1:N
     end
 end
 
-options = sdpsettings('verbose', 0, 'solver', 'ipopt');
+options = sdpsettings('verbose', 0, 'debug', 1, 'solver', 'ipopt');
 diagnostics = optimize(constraints, cost, options);
 
 if (diagnostics.problem == 0)
@@ -103,6 +114,7 @@ if (diagnostics.problem == 0)
     uOpt = double(u);
     JOpt = double(cost);
 else
+    diagnostics.problem;
     feas = false;
     zOpt = [];
     JOpt = [];

@@ -80,17 +80,18 @@ for i = 1:M
     % calculate the minimum distance from the vehicle to the object(s) in
     % the body frame
     [minDistance, minObstaclePoint] = min_distance_calc(zOpt(:,i), uOpt, VehicleParams, N, sampleTime, ObstacleParams);
-
+    % display(minObstaclePoint);
+    
     % find the point to pursue
-    pursuitPoint = find_pursuit_point(zOpt(:,i), uOpt, VehicleParams, vehiclePath, N, sampleTime);
+    % pursuitPoint = find_pursuit_point(zOpt(:,i), uOpt, VehicleParams, vehiclePath, N, sampleTime);
     for j = 1:N
-        pursuitPoint(:,j) = [zOpt(1,i)+(j-1)*0.1*30; 0; 30; zOpt(4,i)];
+        pursuitPoint(:,j) = [zOpt(1,i)+(j-1)*sampleTime*30; 0; 30; zOpt(4,i)];
     end
     % display(pursuitPoint);
     % lower state constraint is dynamic
     IneqConstraints.zMin = [zOpt(1,i); -3; 0; -2*pi];
     % solve the cftoc problem for a kinematic bicycle model and run in "open-loop"
-    [feas(i), z, u, cost] = cftoc_kinematic_bike(N, zOpt(:,i), sampleTime, VehicleParams, IneqConstraints, pursuitPoint, minDistance, minObstaclePoint);
+    [feas(i), z, u, cost] = cftoc_kinematic_bike(N, zOpt(:,i), sampleTime, VehicleParams, IneqConstraints, pursuitPoint, minDistance, minObstaclePoint, ObstacleParams);
     
     if ~feas(i)
         disp('Infeasible region reached!');
