@@ -38,10 +38,17 @@ ObstacleParams(3).bounds = [-1, 1, -1, 1]; % [m]
 % Vehicle Dimensions %
 %%%%%%%%%%%%%%%%%%%%%%
 % vehicle wheelbase
-VehicleParams.lf = 4.65/2; % [m]
-VehicleParams.lr = 4.65/2; % [m]
+VehicleParams.lf = 2.4739; % [m]
+VehicleParams.lr = 3.7761; % [m]
 % vehicle track width
-VehicleParams.trackWidth = 1.78; % [m]
+VehicleParams.trackWidth = 1.245; % [m]
+% vehicle cornering coefficients
+VehicleParams.Cf = 151550; % [N/rad]
+VehicleParams.Cr = 52020; % [N/rad]
+% yaw inertia
+VehicleParams.Izz = 93343; % [kg*m^2]
+% vehicle mass
+VehicleParams.mass = 17130; % [kg]
 
 %% MPC Parameters
 % sampling time
