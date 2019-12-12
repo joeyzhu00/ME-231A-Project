@@ -2,7 +2,7 @@ function avoid = avoidHeuristic(ObstacleParams, z0, sampleDist)
 
 % Function to decide direction to dodge toward and to calculate the
 % location of the obstacle in term of "s" (distance along path divided by
-% path length) and "y" (distance away from the centerline of the path)
+% sample distance) and "y" (distance away from the centerline of the path)
 %
 % !!! Currenly assume straight line path. To make this work for a curve, need
 % to add rhoS in here and project the shape of the onstacle to the
