@@ -1,4 +1,4 @@
-function [feas, zOpt, uOpt, JOpt] = cftoc_kinematic_bike(N, z0, sampleTime, VehicleParams, IneqConstraints, pursuitPoint, minDistance, minObstaclePoint)
+function [feas, zOpt, uOpt, JOpt] = cftoc_kinematic_bike(N, z0, sampleTime, VehicleParams, IneqConstraints, pursuitPoint)
 % Function to solve the constrained finite time optimal control problem
 % with a kinematic bicycle model to track a global path.
 %
@@ -25,20 +25,10 @@ function [feas, zOpt, uOpt, JOpt] = cftoc_kinematic_bike(N, z0, sampleTime, Vehi
 %                    betaRange - double
 %                    longAccelRange - double
 %
-%       pursuitPoint - double (2x1)
-%           XY-points to pursue: [x-pos; y-pos]
-%                                [m; m]
+%       pursuitPoint - double (4x1)
+%           XY-points to pursue: [x-pos; y-pos; speed; vehicle heading]
+%                                [m; m; m/s; rad]
 %
-%       minDistance - double (Px1)
-%           Distance from the front of the vehicle to the object bounds in
-%           the body frame. P denotes the number of obstacles that are
-%           present. 
-%
-%       minObstaclePoint - double(Px2)
-%           Location of each obstacle point that is closest to the vehicle
-%           in the global frame
-%               [x-pos, y-pos]
-%               [m, m]
 %
 % OUTPUTS:
 %      feas - bool
@@ -67,21 +57,12 @@ constraints = z(:,1) == z0;
 % initialize the cost
 cost = 0;
 
-minDistanceFlag = 1;
-if (all(minDistance) >= 0) & (all(minDistance) <= 1000)
-    minDistanceFlag = 0;
-end
 % only apply cost for the last 4 points
 for i = N:-1:N-3
     cost = cost + norm(z(:,i)-pursuitPoint(:,i))^2;
 end
 % loop through the horizon
 for i = 1:N
-    if ~minDistanceFlag
-        for j = 1:size(minObstaclePoint,1)
-            cost = cost + 10*z(3,i)/(((-1)*(minObstaclePoint(j,2)-z(2,i))*sin(z(4,i)) + (minObstaclePoint(j,1)-z(1,i))*cos(z(4,i))) + 0.00001);
-        end
-    end
     constraints = [constraints, ...
                    IneqConstraints.zMin <= z(:,i) <= IneqConstraints.zMax, ...         % state constraints
                    IneqConstraints.uMin <= u(:,i) <= IneqConstraints.uMax, ...         % input constraints

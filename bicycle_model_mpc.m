@@ -23,16 +23,16 @@ vehiclePath(2,:) = yInterpCoordinates;
 % Obstacle Bounds/Centroid %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % coordinates of the obstacle centroid (x,y)
-ObstacleParams(1).centroids = [110; 0]; % [m]
+ObstacleParams(1).centroids = [30; 0.5]; % [m]
 % obstacle vertex boundaries (assuming everything is rectangular)
 % [xMin, xMax, yMin, yMax]
-ObstacleParams(1).bounds = [-1, 1, -0.5, 0.5]; % [m]
+ObstacleParams(1).bounds = [-1.5, 1.5, -0.5, 0.5]; % [m]
 
-ObstacleParams(2).centroids = [110; 1.5]; % [m]
-ObstacleParams(2).bounds = [-1, 1, -0.5, 0.5]; % [m]
+ObstacleParams(2).centroids = [55; 0]; % [m]
+ObstacleParams(2).bounds = [-1.5, 1.5, -0.5, 0.5]; % [m]
 
-ObstacleParams(3).centroids = [120; -1.5]; % [m]
-ObstacleParams(3).bounds = [-1, 1, -1, 1]; % [m]
+% ObstacleParams(3).centroids = [120; -1.5]; % [m]
+% ObstacleParams(3).bounds = [-1, 1, -1, 1]; % [m]
 
 %%%%%%%%%%%%%%%%%%%%%%
 % Vehicle Dimensions %
@@ -54,7 +54,7 @@ VehicleParams.mass = 17130; % [kg]
 % sampling time
 sampleTime = 0.1; % [sec]
 % MPC Horizon
-M = 50;
+M = 30;
 % CFTOC Horizon
 N = 5;
 % initial conditions

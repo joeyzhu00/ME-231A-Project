@@ -71,6 +71,20 @@ IneqConstraints.betaRange = 0.05; % [rad]
 % limit on longitudinal acceleration
 IneqConstraints.longAccelRange = 0.06; % [m/s^2]
 
+% tune this to add padding around obstacles, higher = MORE padding
+% too small will make MPC not feasible easier! We can't prove where this
+% algorithm is persistently feasible :(. It is not in certain conditions. 
+% THERE IS POSSIBILITY TO HEAD STRAIGHT FOR OBSTACLE IF N IS NOT LONG
+% ENOUGH TO "SEE" IT IN THE CFTOC. DISCUSS THIS IN PAPER WRITE UP!
+avoidTune = 3.0;
+
+% Tune how closely the vehicle track the path. Higher is aggressive
+% tracking
+trackTune = 1.5;
+
+%Path - ALMOST STRAIGHT LINE 
+rhoS = 10000; % 10km radius of curvature path. Approximate a straight road
+
 zOpt = zeros(nz, M+1);
 uOpt = zeros(nu, M);
 JOpt = zeros(1,M);
@@ -81,16 +95,19 @@ zOpt(:,1) = z0;
 uOpt(:,1) = [0;0];
 for i = 1:M
     fprintf('Working on MPC Iteration #%d \n', i);
-    % calculate the minimum distance from the vehicle to the object(s) in
-    % the body frame
-    [minDistance, minObstaclePoint] = min_distance_calc(zOpt(:,i), uOpt, VehicleParams, N, sampleTime, ObstacleParams);
-
     % find the point to pursue
-    pursuitPoint = find_pursuit_point(zOpt(:,i), uOpt, VehicleParams, vehiclePath, N, sampleTime);
+%     pursuitPoint = find_pursuit_point(zOpt(:,i), uOpt, VehicleParams, vehiclePath, N, sampleTime);
+    IneqConstraints.zMin = [zOpt(1,i); -5; 0; -2*pi];
+    
+    % do the high-level MPC to figure out the path
+    for j = 1:N
+        [~, zSpatial, ~, costSpatial] = cftoc_kinematic_bike_spatial(N, zOpt(:,i), sampleTime, VehicleParams, IneqConstraints, ObstacleParams, rhoS, avoidTune, trackTune);
+    end
+    
+    pursuitPoint = zSpatial;
     % lower state constraint is dynamic
-    IneqConstraints.zMin = [zOpt(1,i); -3; 0; -2*pi];
     % solve the cftoc problem for a kinematic bicycle model and run in "open-loop"
-    [feas(i), z, u, cost] = cftoc_kinematic_bike(N, zOpt(:,i), sampleTime, VehicleParams, IneqConstraints, pursuitPoint, minDistance, minObstaclePoint);
+    [feas(i), z, u, cost] = cftoc_kinematic_bike(N, zOpt(:,i), sampleTime, VehicleParams, IneqConstraints, pursuitPoint);
     
     if ~feas(i)
         disp('Infeasible region reached!');
