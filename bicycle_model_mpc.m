@@ -54,7 +54,7 @@ VehicleParams.mass = 17130; % [kg]
 % sampling time
 sampleTime = 0.1; % [sec]
 % MPC Horizon
-M = 60;
+M = 30;
 % CFTOC Horizon
 N = 5;
 % initial conditions
