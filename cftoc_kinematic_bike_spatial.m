@@ -98,23 +98,23 @@ cost = trackTune*z(2,N+1)^2;
 constraints = [constraints,...
     -pi/6<=z(1,N+1)<=pi/6]; % soft constraints on final heading
 
-for k=1:N;
-% System Dynamics Constraints
-constraints = [constraints,...
-    z(1,k+1) == z(1,k)+sampleDist*(((rhoS-z(2,k))*sin(u(2,k)))/(rhoS*z(3,k)*cos(z(1,k)))-1/rhoS),...
-    z(2,k+1) == z(2,k)+sampleDist*(sin(z(1,k))*(rhoS-z(2,k)))/(rhoS*cos(z(1,k))),...
-    z(3,k+1) == z(3,k)+0*sampleDist*u(1,k)]; % NO BRAKING FOR NOW. Remove zero to add braking/accel
-% State Constraints
-constraints = [constraints,...
-    IneqConstraints.zMin(4)<=z(1,k+1)<=IneqConstraints.zMax(4),... %Heading
-    IneqConstraints.zMin(2)<=z(2,k+1)<=IneqConstraints.zMax(2),... %Deviation from lane
-    IneqConstraints.zMin(3)<=z(3,k+1)<=IneqConstraints.zMax(3)]; %Speed
-% Input Constraints
-constraints = [constraints, IneqConstraints.uMin(1)<=u(1,k)<=IneqConstraints.uMax(1),...
-    IneqConstraints.uMin(2)<=u(2,k)<=IneqConstraints.uMax(2)];
-% Cost
-% Currently only penalizing y-position tracking and steering input.
-cost = cost + trackTune*z(2,k)^2 + inputCostTune*u(2,k)^2;
+for k=1:N
+    % System Dynamics Constraints
+    constraints = [constraints,...
+        z(1,k+1) == z(1,k)+sampleDist*(((rhoS-z(2,k))*sin(u(2,k)))/(rhoS*z(3,k)*cos(z(1,k)))-1/rhoS),...
+        z(2,k+1) == z(2,k)+sampleDist*(sin(z(1,k))*(rhoS-z(2,k)))/(rhoS*cos(z(1,k))),...
+        z(3,k+1) == z(3,k)+0*sampleDist*u(1,k)]; % NO BRAKING FOR NOW. Remove zero to add braking/accel
+    % State Constraints
+    constraints = [constraints,...
+        IneqConstraints.zMin(4)<=z(1,k+1)<=IneqConstraints.zMax(4),... %Heading
+        IneqConstraints.zMin(2)<=z(2,k+1)<=IneqConstraints.zMax(2),... %Deviation from lane
+        IneqConstraints.zMin(3)<=z(3,k+1)<=IneqConstraints.zMax(3)]; %Speed
+    % Input Constraints
+    constraints = [constraints, IneqConstraints.uMin(1)<=u(1,k)<=IneqConstraints.uMax(1),...
+        IneqConstraints.uMin(2)<=u(2,k)<=IneqConstraints.uMax(2)];
+    % Cost
+    % Currently only penalizing y-position tracking and steering input.
+    cost = cost + trackTune*z(2,k)^2 + inputCostTune*u(2,k)^2;
 
 end
 
@@ -127,7 +127,7 @@ avoid = avoidHeuristic(ObstacleParams, z0, sampleDist);
 % Obstacle x coordinates have been converted to spatial s
 % Obstacle y coordinate have been converted to ey-distance from road
 % centerline 
-for j=1:size(ObstacleParams,2); %loop through all obstacles 
+for j=1:size(ObstacleParams,2) %loop through all obstacles 
     for k=avoid.s(j,1):avoid.s(j,2) %loop through space s of each obstacle
         if and(avoid.mode(j,1)==1,k<=N+1) %avoid left if obstacle is right of Veh heading
             % vehicle y position greater than obstacle bound y max position
@@ -151,7 +151,7 @@ if (diagnostics.problem == 0)
     zOptSpatial = double(z);
     uOptSpatial = double(u);
     JOpt = double(cost);
-    for k=1:N;
+    for k=1:N
         interpTime(1,k+1)=interpTime(1,k)+sampleDist*(rhoS-zOptSpatial(2,k))/(rhoS*zOptSpatial(3,k)*cos(zOptSpatial(1,k)));
     end
 else

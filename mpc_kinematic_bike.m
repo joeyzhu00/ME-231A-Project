@@ -101,7 +101,7 @@ for i = 1:M
     
     % do the high-level MPC to figure out the path
     for j = 1:N
-        [~, zSpatial, ~, costSpatial] = cftoc_kinematic_bike_spatial(N, zOpt(:,i), sampleTime, VehicleParams, IneqConstraints, ObstacleParams, rhoS, avoidTune, trackTune);
+        [~, zSpatial, ~, ~] = cftoc_kinematic_bike_spatial(N, zOpt(:,i), sampleTime, VehicleParams, IneqConstraints, ObstacleParams, rhoS, avoidTune, trackTune);
     end
     
     pursuitPoint = zSpatial;
