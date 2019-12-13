@@ -61,7 +61,7 @@ nz = length(z0);
 nu = 2;
 
 % upper state constraints
-IneqConstraints.zMax = [vehiclePath(1,end); 3; 40; 2*pi];
+IneqConstraints.zMax = [vehiclePath(1,end); 6; 40; 2*pi];
 % lower input constraints
 IneqConstraints.uMin = [-0.5; -30*pi/180];
 % upper input constraints
@@ -82,6 +82,7 @@ avoidTune = 3.0;
 % tracking
 trackTune = 1.5;
 
+
 %Path - ALMOST STRAIGHT LINE 
 rhoS = 10000; % 10km radius of curvature path. Approximate a straight road
 
@@ -97,7 +98,7 @@ for i = 1:M
     fprintf('Working on MPC Iteration #%d \n', i);
     % find the point to pursue
 %     pursuitPoint = find_pursuit_point(zOpt(:,i), uOpt, VehicleParams, vehiclePath, N, sampleTime);
-    IneqConstraints.zMin = [zOpt(1,i); -5; 0; -2*pi];
+    IneqConstraints.zMin = [zOpt(1,i); -6; 0; -2*pi];
     
     % do the high-level MPC to figure out the path
     for j = 1:N

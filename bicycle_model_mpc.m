@@ -7,7 +7,7 @@ clc,clear,close all
 %%%%%%%%%%%%%%%%
 % coordinates to make a straight path in xy-coordinates, for a straight
 % line path, set all the yCoordinates to 0
-xCoordinates = 0:50:500;
+xCoordinates = 0:50:200;
 yCoordinates = zeros(1, length(xCoordinates));
 % yCoordinates = [0, 10, 10, 15, 20, 30, 30, 15, 10, -5, -10];
 
@@ -54,7 +54,7 @@ VehicleParams.mass = 17130; % [kg]
 % sampling time
 sampleTime = 0.1; % [sec]
 % MPC Horizon
-M = 30;
+M = 60;
 % CFTOC Horizon
 N = 5;
 % initial conditions
