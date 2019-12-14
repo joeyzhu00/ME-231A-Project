@@ -66,26 +66,50 @@ stopCondition = 10; % [m]
 
 tic
 % do the MPC
-[feas, zOpt, uOpt, JOpt] = mpc_kinematic_bike(M, N, z0, vehiclePath, sampleTime, VehicleParams, stopCondition, ObstacleParams);
+[feas, zOpt, uOpt, JOpt, pursuitPoints] = mpc_kinematic_bike(M, N, z0, vehiclePath, sampleTime, VehicleParams, stopCondition, ObstacleParams);
 toc
 %% Do some plotting
+close all
+%High level open loop predictions
+figure("Name", "High Level Open Loop Predictions")
+for i = 1:M
+    plot(pursuitPoints(1,:,i), pursuitPoints(2,:,i))
+    hold on
+end
+for k = 1:length(ObstacleParams)
+    rectangle('Position', [ObstacleParams(k).centroids(1)+ObstacleParams(k).bounds(1), ObstacleParams(k).centroids(2)+ObstacleParams(k).bounds(3), ...
+                          -ObstacleParams(k).bounds(1)+ObstacleParams(k).bounds(2), -ObstacleParams(k).bounds(3)+ObstacleParams(k).bounds(4)]);
+    plot(ObstacleParams(k).centroids(1), ObstacleParams(k).centroids(2), 'o');
+end
+xlabel('X-Position [m]');
+ylabel('Y-Position [m]');
+
+% Path, Speed, and heading angle
 time = 0:sampleTime:sampleTime*length(zOpt)-sampleTime;
-figure(1)
+figure("Name", "Vehicle Path, Speed, and Heading Angle")
 subplot(3,1,1);
 plot(vehiclePath(1,:), vehiclePath(2,:));
 hold on
 plot(zOpt(1,:), zOpt(2,:), '.', 'MarkerSize', 8);
-hold on
 plotLegend = {'Vehicle Path', 'Vehicle State'};
 
 % plot the obstacles
 for k = 1:length(ObstacleParams)
     rectangle('Position', [ObstacleParams(k).centroids(1)+ObstacleParams(k).bounds(1), ObstacleParams(k).centroids(2)+ObstacleParams(k).bounds(3), ...
                           -ObstacleParams(k).bounds(1)+ObstacleParams(k).bounds(2), -ObstacleParams(k).bounds(3)+ObstacleParams(k).bounds(4)]);
-    hold on
     plotLegend{k+2} = sprintf('Obstacle #%d', k);
     plot(ObstacleParams(k).centroids(1), ObstacleParams(k).centroids(2), 'o');
-    hold on
+end
+
+%Rotate about z axis
+direction = [0 0 1];
+for k = 1:M+1
+    v = [zOpt(1,k)-VehicleParams.lr, zOpt(2,k)-VehicleParams.trackWidth/2;...
+        zOpt(1,k)-VehicleParams.lr, zOpt(2,k)+VehicleParams.trackWidth/2;...
+         zOpt(1,k)+VehicleParams.lf, zOpt(2,k)+VehicleParams.trackWidth/2; ...
+        zOpt(1,k)+VehicleParams.lf, zOpt(2,k)-VehicleParams.trackWidth/2];
+    veh = patch('Vertices',v, 'Faces',[1 2 3 4], 'EdgeColor', 'black', 'FaceColor', 'none');
+    rotate(veh, direction, zOpt(4,k)*180/pi, [zOpt(1,k), zOpt(2,k),0]);
 end
 hold off
 grid on
@@ -110,7 +134,7 @@ ylabel('Heading Angle [rad]');
 title('Vehicle Heading Angle');
 
 inputTime = time(1:end-1);
-figure(2)
+figure("Name", "Vehicle Acceleration, Steering, and Cost")
 subplot(3,1,1);
 plot(inputTime, uOpt(1,:));
 grid on

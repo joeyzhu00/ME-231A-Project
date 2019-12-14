@@ -1,4 +1,4 @@
-function [feas, zOpt, uOpt, JOpt] = mpc_kinematic_bike(M, N, z0, vehiclePath, sampleTime, VehicleParams, stopCondition, ObstacleParams)
+function [feas, zOpt, uOpt, JOpt, pursuitPoints] = mpc_kinematic_bike(M, N, z0, vehiclePath, sampleTime, VehicleParams, stopCondition, ObstacleParams)
 % Function to facilitate MPC for the kinematic bicycle to track a global
 % path. The lower state constraints are currently static to force the
 % vehicle to keep moving along the path. An obstacle avoidance cost is
@@ -90,6 +90,7 @@ zOpt = zeros(nz, M+1);
 uOpt = zeros(nu, M);
 JOpt = zeros(1,M);
 feas = false([1, M]);
+pursuitPoints = zeros(nz, N+1, M);
 
 % initial conditions
 zOpt(:,1) = z0;
@@ -101,14 +102,15 @@ for i = 1:M
     IneqConstraints.zMin = [zOpt(1,i); -6; 0; -2*pi];
     
     % do the high-level MPC to figure out the path
-    for j = 1:N
-        [~, zSpatial, ~, ~] = cftoc_kinematic_bike_spatial(N, zOpt(:,i), sampleTime, VehicleParams, IneqConstraints, ObstacleParams, rhoS, avoidTune, trackTune);
-    end
+    [~, zSpatial, ~, ~] = cftoc_kinematic_bike_spatial(N, zOpt(:,i), sampleTime, VehicleParams, IneqConstraints, ObstacleParams, rhoS, avoidTune, trackTune);
+
     
-    pursuitPoint = zSpatial;
+    pursuitPoints(:,:,i) = zSpatial;
+    %display(zSpatial)
+    
     % lower state constraint is dynamic
     % solve the cftoc problem for a kinematic bicycle model and run in "open-loop"
-    [feas(i), z, u, cost] = cftoc_kinematic_bike(N, zOpt(:,i), sampleTime, VehicleParams, IneqConstraints, pursuitPoint);
+    [feas(i), z, u, cost] = cftoc_kinematic_bike(N, zOpt(:,i), sampleTime, VehicleParams, IneqConstraints, pursuitPoints(:,:,i));
     
     if ~feas(i)
         disp('Infeasible region reached!');
