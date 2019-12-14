@@ -25,7 +25,7 @@ function [feas, zOpt, uOpt, JOpt] = cftoc_kinematic_bike(N, z0, sampleTime, Vehi
 %                    betaRange - double
 %                    longAccelRange - double
 %
-%       pursuitPoint - double (2x1)
+%       pursuitPoint - double (2xN)
 %           XY-points to pursue: [x-pos; y-pos]
 %                                [m; m]
 %
@@ -46,6 +46,8 @@ function [feas, zOpt, uOpt, JOpt] = cftoc_kinematic_bike(N, z0, sampleTime, Vehi
 nz = length(z0);
 % number of inputs [longitudinal accel; steering angle]
 nu = 2;
+% control horizon CH
+CH = 2;
 
 z = sdpvar(nz, N+1);
 u = sdpvar(nu, N);
@@ -59,6 +61,15 @@ cost = 0;
 for i = N:-1:N-3
     cost = cost + norm(z(:,i)-pursuitPoint(:,i))^2;
 end
+
+for i = 1:CH
+    if i == 1
+        cost = cost + norm(u(:,i))^2;
+    else
+        cost = cost + norm(u(:,i) - u(:,i-1))^2;
+    end
+end
+
 % loop through the horizon
 for i = 1:N
     constraints = [constraints, ...
@@ -70,6 +81,9 @@ for i = 1:N
         constraints = [constraints, ...
                        -IneqConstraints.longAccelRange <= u(1,i+1) - u(1,i) <= IneqConstraints.longAccelRange, ...
                        -IneqConstraints.betaRange <= u(2,i+1) - u(2,i) <= IneqConstraints.betaRange];            
+    end
+    if i > CH
+        constraints = [constraints, u(:,i-1) == u(:,i)];
     end
 end
 
