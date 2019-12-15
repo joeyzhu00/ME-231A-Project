@@ -66,10 +66,10 @@ VehicleParams.trackWidth = 1.78; % [m]
 %Path - ALMOST STRAIGHT LINE 
 rhoS = 10000; % 10km radius of curvature path. Approximate a straight road
 
-ObstacleParams(1).centroids = [30; .5]; % [m]
+ObstacleParams(1).centroids = [30; 0.5]; % [m]
 % obstacle vertex boundaries (assuming everything is rectangular)
 % [xMin, xMax, yMin, yMax]
-ObstacleParams(1).bounds = [-1.5, 1.5, -0.5, 0.5]; % [m]
+ObstacleParams(1).bounds = [-2.5, 2.5, -0.5, 0.5]; % [m]
 
 ObstacleParams(2).centroids = [55; 0];
 ObstacleParams(2).bounds = [-1.5, 1.5, -0.5, 0.5]; % [m]
@@ -82,9 +82,9 @@ nz = length(z0);
 % number of inputs [longitudinal accel; steering angle]
 nu = 2;
 
-IneqConstraints.zMax = [10000; 5; z0(3)+1; 45*pi/180];
+IneqConstraints.zMax = [10000; 5; z0(3)+1; 60*pi/180];
 % upper state constraints
-IneqConstraints.zMin = [0; -5; z0(3)-1; -45*pi/180];
+IneqConstraints.zMin = [0; -5; z0(3)-1; -60*pi/180];
 % lower input constraints
 IneqConstraints.uMin = [-0.5; -30*pi/180];
 % upper input constraints
@@ -108,11 +108,11 @@ uOpt(:,1) = [0;0];
 % algorithm is persistently feasible :(. It is not in certain conditions. 
 % THERE IS POSSIBILITY TO HEAD STRAIGHT FOR OBSTACLE IF N IS NOT LONG
 % ENOUGH TO "SEE" IT IN THE CFTOC. DISCUSS THIS IN PAPER WRITE UP!
-avoidTune = 3.0;
+avoidTune = 1;
 
 % Tune how closely the vehicle track the path. Higher is aggressive
 % tracking
-trackTune = 1.5;
+trackTune = avoidTune/5;
 
 figure('name', 'position')
 for i = 1:M
