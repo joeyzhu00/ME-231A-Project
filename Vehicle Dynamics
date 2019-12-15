@@ -1,0 +1,43 @@
+function [dx,y] = vehicle_dynamics(t, x, u, m, f, r, st)
+    
+    % function parameters
+    
+    % t: present time
+    % x: the state vector at time t 
+    % u: the input vector at time t 
+    % m: mass of the vehicle [kg]
+    % f: distance from front axle to COG [m]
+    % r: distance from rear axle to COG [m]
+    % st: lateral tire stiffness [N/rad] 
+  
+    
+    J = m*0.25*(f+r)^2;                             % moment of inertia  [kg*m^2]
+    ff =  st*(u(1)-atan((x(4)+f*x(2))./x(3)));     % lateral tire force on front tires [N]
+    rf = -st*atan((x(4)-r*x(2))./x(3));            % lateral tire force on rear tires [N]
+    vx_inertial = x(3).*cos(x(1))-x(4).*sin(x(1));  % longitudinal velocity in inertial reference frame [m/s]
+    vy_inertial = x(3).*sin(x(1))+x(4).*cos(x(1));  % lateral velocity in inertial reference frame [m/s]
+
+    
+    % state equations
+    dx = [x(2);                                               ... % yaw angle velocity [rad/s]
+          1/J*(f*(u(2)*sin(u(1))+ff*cos(u(1)))-r*rf);       ... % yaw angle accel. [rad/s^2]
+          1/m*(u(2)*cos(u(1))-ff*sin(u(1))+u(3))+x(4).*x(2); ... % longitudinal accel. in body reference frame [m/s^2]
+          1/m*(u(2)*sin(u(1))+ff*cos(u(1))+rf)-x(3).*x(2);  ... % lateral accel. in body reference frame [m/s^2]
+          vx_inertial; ... % longitudinal velocity in inertial reference frame [m/s]
+          vy_inertial  ... % lateral velocity in inertial reference frame [m/s]
+         ];
+
+     
+    % output equations
+    y = [x(1); ... % yaw angle [rad]
+         x(2); ... % yaw angle velocity [rad/s]
+         x(3); ... % longitudinal velocity in body reference frame [m/s]
+         x(4); ... % lateral velocity in body reference frame [m/s]     
+         x(5); ... % longitudinal position in inertial reference frame [m]
+         x(6); ... % lateral position in inertial reference frame [m]
+         vx_inertial; ... % longitudinal velocity in inertial reference frame [m/s]
+         vy_inertial; ... % lateral velocity in inertial reference frame [m/s]
+         ff; ...         % lateral tire force on front tires [N]
+         rf ...         % lateral tire force on rear tires [N]
+        ];
+end
