@@ -102,10 +102,14 @@ for i = 1:M
     IneqConstraints.zMin = [zOpt(1,i); -6; 0; -2*pi];
     
     % do the high-level MPC to figure out the path
-    [~, zSpatial, ~, ~] = cftoc_kinematic_bike_spatial(N, zOpt(:,i), sampleTime, VehicleParams, IneqConstraints, ObstacleParams, rhoS, avoidTune, trackTune);
+    [planFeas, zSpatial, ~, ~] = cftoc_kinematic_bike_spatial(N, zOpt(:,i), sampleTime, VehicleParams, IneqConstraints, ObstacleParams, rhoS, avoidTune, trackTune);
 
-    
+    if ~planFeas(i)
+        disp('High Level infeasible region reached!');
+        return;
+    end
     pursuitPoints(:,:,i) = zSpatial;
+
     %display(zSpatial)
     
     % lower state constraint is dynamic
