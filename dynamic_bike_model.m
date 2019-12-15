@@ -1,4 +1,4 @@
-function zOut = dynamic_bike_model(z, u, sampleTime, VehicleParams)
+function zOut = vehicle_dynamics(z, u, sampleTime, VehicleParams)
 % Function representing the dynamic bicycle model to update the state
 % feedback
 %
@@ -17,36 +17,47 @@ function zOut = dynamic_bike_model(z, u, sampleTime, VehicleParams)
 %          Sampling Time [sec]
 %
 %       VehicleParams - struct 
-%          Contains: lf - distance from CM to front wheel [m]
-%                    lr - distance from CM to rear wheel [m]
+%          Contains: lfl - distance from CM to front wheel left [m]
+%                    lfr - distance from CM to front wheel right [m]
+%                    lrl - distance from CM to rear wheel left[m]
+%                    lrr - distance from CM to rear wheel right[m]
 %                    trackWidth - Axle width [m]
-%                    Cf - Front tire cornering coefficient [N/rad]
-%                    Cr - Rear tire cornering coefficient [N/rad]
+%                    Cfl - Front left tire cornering coefficient [N/rad]
+%                    Cfr - Front tight tire cornering coefficient [N/rad]
+%                    Crl - Rear left tire cornering coefficient [N/rad]
+%                    Crr - Rear right tire cornering coefficient [N/rad]
 %                    Izz - Yaw Inertia [kg*m^2]
 %                    mass - Vehicle Mass [kg]
+%                    Bf - Distance from rear axle to CM
 %
 % OUTPUTS:
 %      zOut - double (4x1)
 %            Updated state trajectory
 
 % global frame kinematics/dynamics
-yawRate = z(3)*sin(u(2))/VehicleParams.lr;
+yawRate = z(3)*sin(u(2))/(VehicleParams.bf);
 xVelocity = z(3)*cos(z(4)+u(2));
 yVelocity = z(3)*sin(z(4)+u(2));
 
 % slip angle calculations
-% front tires
-alphaF = z(4) + VehicleParams.lf*yawRate/z(3) - u(2);
-% rear tires
-alphaR = z(4) - VehicleParams.lr*yawRate/z(3);
+% front left tire
+alphaFl = z(4) + VehicleParams.lfl*yawRate/z(3) - u(2);
+% front right tire
+alphaFr = z(4) + VehicleParams.lfr*yawRate/z(3) - u(2);
+% rear left tires
+alphaRl = z(4) - VehicleParams.lrl*yawRate/z(3);
+% rear right tires
+alphaRr = z(4) - VehicleParams.lrr*yawRate/z(3);
 
 % tire force calculation
-Fyf = -VehicleParams.Cf*alphaF;
-Fyr = -VehicleParams.Cr*alphaR;
+Fyfl = -VehicleParams.Cfl*alphaFl;
+Fyfr = -VehicleParams.Cfr*alphaFr;
+Fyrl = -VehicleParams.Crl*alphaRl;
+Fyrr = -VehicleParams.Crr*alphaRr;
 
 xAccel = yawRate*yVelocity + u(1);
-yAccel = -yawRate*xVelocity + (2/VehicleParams.mass)*(Fyf*cos(u(2)) + Fyr);
-yawAccel = (2/VehicleParams.Izz)*(VehicleParams.lf*Fyf - VehicleParams.lr*Fyr);
+yAccel = -yawRate*xVelocity + (2/VehicleParams.mass)*((Fyfl+Fyfr)*cos(u(2)) + (Fyrl+Fyrr));
+yawAccel = (2/VehicleParams.Izz)*((VehicleParams.lfl+VehicleParams.lfr)*(Fyfl+Fyfr) - (VehicleParams.lrl+VehicleParams.lrr)*(Fyrl+Fyrr));
 
 zOut(1) = z(1) + sampleTime*xVelocity + (sampleTime^2)*xAccel;
 zOut(2) = z(2) + sampleTime*yVelocity + (sampleTime^2)*yAccel;
