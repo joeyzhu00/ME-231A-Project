@@ -88,7 +88,7 @@ constraints = z(:,1) == zSpatial0;
 
 % Consider tuning this to smooth or inputs, or just use u(k+1)-u(k)
 % constraints instead.
-inputCostTune = 1;
+inputCostTune = 5.0;
 
 % Terminal cost
 % Currently only penalizing y-position tracking.
@@ -96,12 +96,12 @@ cost = trackTune*z(2,N+1)^2;
 
 %Terminal Constraints
 constraints = [constraints,...
-    -pi/6<=z(1,N+1)<=pi/6]; % soft constraints on final heading
+    IneqConstraints.zMin(4)<=z(1,N+1)<=IneqConstraints.zMax(4)]; % constraints on final heading
 
 for k=1:N;
 % System Dynamics Constraints
 constraints = [constraints,...
-    z(1,k+1) == z(1,k)+sampleDist*(((rhoS-z(2,k))*sin(u(2,k)))/(rhoS*z(3,k)*cos(z(1,k)))-1/rhoS),...
+    z(1,k+1) == z(1,k)+sampleDist*(((rhoS-z(2,k))*tan(u(2,k)))/(rhoS*(VehicleParams.lf+VehicleParams.lr)*cos(z(1,k)))-1/rhoS),...
     z(2,k+1) == z(2,k)+sampleDist*(sin(z(1,k))*(rhoS-z(2,k)))/(rhoS*cos(z(1,k))),...
     z(3,k+1) == z(3,k)+0*sampleDist*u(1,k)]; % NO BRAKING FOR NOW. Remove zero to add braking/accel
 % State Constraints
