@@ -51,6 +51,7 @@ CH = 2;
 
 z = sdpvar(nz, N+1);
 u = sdpvar(nu, N);
+v = sdpvar(nz, 1);
 
 % initial condition constraint
 constraints = z(:,1) == z0;
@@ -61,7 +62,7 @@ cost = 0;
 for i = N:-1:N-3
     cost = cost + norm(z(:,i)-pursuitPoint(:,i))^2;
 end
-
+% only account for the first few actions
 for i = 1:CH
     if i == 1
         cost = cost + norm(u(:,i))^2;
@@ -70,13 +71,16 @@ for i = 1:CH
     end
 end
 
+% add soft constraint
+cost = cost + 0.5 * norm(v,1)^2 + norm(v,1);
+
 % loop through the horizon
 for i = 1:N
     constraints = [constraints, ...
-                   IneqConstraints.zMin <= z(:,i) <= IneqConstraints.zMax, ...         % state constraints
+                   IneqConstraints.zMin - v <= z(:,i) <= IneqConstraints.zMax + v, ...         % state constraints
                    IneqConstraints.uMin <= u(:,i) <= IneqConstraints.uMax, ...         % input constraints
                    z(:,i+1) == bike_model(z(:,i), u(:,i), sampleTime, VehicleParams)]; % state dynamics
-    if i <= N-1
+    if i <= CH
         % input constraints up to N-1
         constraints = [constraints, ...
                        -IneqConstraints.longAccelRange <= u(1,i+1) - u(1,i) <= IneqConstraints.longAccelRange, ...
@@ -86,6 +90,9 @@ for i = 1:N
         constraints = [constraints, u(:,i-1) == u(:,i)];
     end
 end
+
+% soft constraint
+constraints = [constraints, v >= 0];
 
 options = sdpsettings('verbose', 0, 'solver', 'ipopt');
 diagnostics = optimize(constraints, cost, options);
