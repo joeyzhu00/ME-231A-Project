@@ -60,7 +60,7 @@ end
 
 % Loop through each obstacles
 for j=1:size(ObstacleParams,2)
-    if all(avoid.s(j,:))==0 % obstacle entirely behind vehicle, ignore. 
+    if all(avoid.s(j,:)==0) % obstacle entirely behind vehicle, ignore. 
         avoid.mode(j,1)=0; 
     elseif posBody(j,2)<=0 % obstacle right of vehicle heading, go left.
         avoid.mode(j,1)=1;
