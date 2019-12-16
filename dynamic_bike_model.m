@@ -28,14 +28,15 @@ function zOut = vehicle_dynamics(z, u, sampleTime, VehicleParams)
 %                    Crr - Rear right tire cornering coefficient [N/rad]
 %                    Izz - Yaw Inertia [kg*m^2]
 %                    mass - Vehicle Mass [kg]
-%                    Bf - Distance from rear axle to CM
+%                    Bf - Distance from front axle to CM
+%                    Br - Distance from rear axle to CM
 %
 % OUTPUTS:
 %      zOut - double (4x1)
 %            Updated state trajectory
 
 % global frame kinematics/dynamics
-yawRate = z(3)*sin(u(2))/(VehicleParams.bf);
+yawRate = z(3)*sin(u(2))/(VehicleParams.bf+VehicleParams.br);
 xVelocity = z(3)*cos(z(4)+u(2));
 yVelocity = z(3)*sin(z(4)+u(2));
 
