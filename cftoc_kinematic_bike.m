@@ -73,13 +73,13 @@ if (all(minDistance) >= 0) & (all(minDistance) <= 1000)
 end
 % only apply cost for the last 4 points
 for i = N:-1:N-3
-    cost = cost + norm(z(:,i)-pursuitPoint(:,i))^2;
+    cost = cost + 5*norm(z(:,i)-pursuitPoint(:,i))^2;
 end
 % loop through the horizon
 for i = 1:N
     if ~minDistanceFlag
         for j = 1:size(minObstaclePoint,1)
-            cost = cost + 10*z(3,i)/(((-1)*(minObstaclePoint(j,2)-z(2,i))*sin(z(4,i)) + (minObstaclePoint(j,1)-z(1,i))*cos(z(4,i))) + 0.00001);
+            cost = cost + 120*z(3,i)/(((-1)*(minObstaclePoint(j,2)-z(2,i))*sin(z(4,i)) + (minObstaclePoint(j,1)-z(1,i))*cos(z(4,i))) + 0.00001);
         end
     end
     constraints = [constraints, ...
@@ -94,7 +94,7 @@ for i = 1:N
     end
 end
 
-options = sdpsettings('verbose', 0, 'solver', 'ipopt');
+options = sdpsettings('verbose', 1, 'solver', 'ipopt');
 diagnostics = optimize(constraints, cost, options);
 
 if (diagnostics.problem == 0)

@@ -57,7 +57,7 @@ nz = length(z0);
 nu = 2;
 
 % upper state constraints
-IneqConstraints.zMax = [vehiclePath(1,end); 3; 40; 2*pi];
+IneqConstraints.zMax = [vehiclePath(1,end); 4; 40; 2*pi];
 % lower input constraints
 IneqConstraints.uMin = [-0.5; -30*pi/180];
 % upper input constraints
@@ -84,7 +84,7 @@ for i = 1:M
     % find the point to pursue
     pursuitPoint = find_pursuit_point(zOpt(:,i), uOpt, VehicleParams, vehiclePath, N, sampleTime);
     % lower state constraint is dynamic
-    IneqConstraints.zMin = [zOpt(1,i); -3; 0; -2*pi];
+    IneqConstraints.zMin = [zOpt(1,i); -4; 0; -2*pi];
     % solve the cftoc problem for a kinematic bicycle model and run in "open-loop"
     [feas(i), z, u, cost] = cftoc_kinematic_bike(N, zOpt(:,i), sampleTime, VehicleParams, IneqConstraints, pursuitPoint, minDistance, minObstaclePoint);
     
