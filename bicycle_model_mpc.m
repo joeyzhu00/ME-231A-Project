@@ -23,16 +23,18 @@ vehiclePath(2,:) = yInterpCoordinates;
 % Obstacle Bounds/Centroid %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % coordinates of the obstacle centroid (x,y)
-ObstacleParams(1).centroids = [110; 0]; % [m]
+ObstacleParams(1).centroids = [40; 0]; % [m]
 % obstacle vertex boundaries (assuming everything is rectangular)
 % [xMin, xMax, yMin, yMax]
-ObstacleParams(1).bounds = [-1, 1, -0.5, 0.5]; % [m]
+% coordinates of the obstacle centroid (x,y)
+ObstacleParams(1).centroids = [30; 0.5]; % [m]
+% obstacle vertex boundaries (assuming everything is rectangular)
+% [xMin, xMax, yMin, yMax]
+ObstacleParams(1).bounds = [-1.5, 1.5, -0.5, 0.5]; % [m]
 
-ObstacleParams(2).centroids = [110; 1.5]; % [m]
-ObstacleParams(2).bounds = [-1, 1, -0.5, 0.5]; % [m]
+ObstacleParams(2).centroids = [55; 0]; % [m]
+ObstacleParams(2).bounds = [-1.5, 1.5, -0.5, 0.5]; % [m]
 
-ObstacleParams(3).centroids = [120; -1.5]; % [m]
-ObstacleParams(3).bounds = [-1, 1, -1, 1]; % [m]
 
 %%%%%%%%%%%%%%%%%%%%%%
 % Vehicle Dimensions %
@@ -42,14 +44,23 @@ VehicleParams.lf = 4.65/2; % [m]
 VehicleParams.lr = 4.65/2; % [m]
 % vehicle track width
 VehicleParams.trackWidth = 1.78; % [m]
+VehicleParams.Cfl = 151550; % [N/rad]
+VehicleParams.Cfr = 151550; % [N/rad]
 
+VehicleParams.Crl = 52020; % [N/rad]
+VehicleParams.Crr = 52020; % [N/rad]
+
+% yaw inertia
+VehicleParams.Izz = 93343; % [kg*m^2]
+% vehicle mass
+VehicleParams.mass = 17130; % [kg]
 %% MPC Parameters
 % sampling time
 sampleTime = 0.1; % [sec]
 % MPC Horizon
-M = 50;
+M = 30;
 % CFTOC Horizon
-N = 5;
+N = 8;
 % initial conditions
 % [x-pos; y-pos; speed; vehicle heading]
 z0 = [0; 0; 30; 0]; % [m; m; m/s; rad]
