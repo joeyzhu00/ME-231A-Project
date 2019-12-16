@@ -72,7 +72,7 @@ constraints = z(:,1) == z0;
 cost = 0;
 
 minDistanceFlag = 1;
-normGain = 10000;
+normGain = 1;
 if (all(minDistance >= 0)) && (all(minDistance <= 1000))
     minDistanceFlag = 0;
     normGain = 1;
