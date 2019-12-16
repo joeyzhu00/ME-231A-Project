@@ -90,6 +90,7 @@ zOpt = zeros(nz, M+1);
 uOpt = zeros(nu, M);
 JOpt = zeros(1,M);
 feas = false([1, M]);
+planFeas = false([1, M]);
 pursuitPoints = zeros(nz, N+1, M);
 
 % initial conditions
@@ -102,7 +103,7 @@ for i = 1:M
     IneqConstraints.zMin = [zOpt(1,i); -6; 0; -2*pi];
     
     % do the high-level MPC to figure out the path
-    [planFeas, zSpatial, ~, ~] = cftoc_kinematic_bike_spatial(N, zOpt(:,i), sampleTime, VehicleParams, IneqConstraints, ObstacleParams, rhoS, avoidTune, trackTune);
+    [planFeas(i), zSpatial, ~, ~] = cftoc_kinematic_bike_spatial(N, zOpt(:,i), sampleTime, VehicleParams, IneqConstraints, ObstacleParams, rhoS, avoidTune, trackTune);
 
     if ~planFeas(i)
         disp('High Level infeasible region reached!');

@@ -38,13 +38,22 @@ ObstacleParams(2).bounds = [-1.5, 1.5, -0.5, 0.5]; % [m]
 % Vehicle Dimensions %
 %%%%%%%%%%%%%%%%%%%%%%
 % vehicle wheelbase
-VehicleParams.lf = 2.4739; % [m]
-VehicleParams.lr = 3.7761; % [m]
+VehicleParams.lfl = 2.4739; % [m]
+VehicleParams.lfr = 2.4739; % [m]
+VehicleParams.bf = 2.4739;
+
+VehicleParams.lrl = 3.7761; % [m]
+VehicleParams.lrr = 3.7761; % [m]
+VehicleParams.br = 3.7761;
 % vehicle track width
 VehicleParams.trackWidth = 1.245; % [m]
 % vehicle cornering coefficients
-VehicleParams.Cf = 151550; % [N/rad]
-VehicleParams.Cr = 52020; % [N/rad]
+VehicleParams.Cfl = 151550; % [N/rad]
+VehicleParams.Cfr = 151550; % [N/rad]
+
+VehicleParams.Crl = 52020; % [N/rad]
+VehicleParams.Crr = 52020; % [N/rad]
+
 % yaw inertia
 VehicleParams.Izz = 93343; % [kg*m^2]
 % vehicle mass
@@ -56,7 +65,7 @@ sampleTime = 0.1; % [sec]
 % MPC Horizon
 M = 30;
 % CFTOC Horizon
-N = 5;
+N = 7;
 % initial conditions
 % [x-pos; y-pos; speed; vehicle heading]
 z0 = [0; 0; 30; 0]; % [m; m; m/s; rad]
@@ -104,10 +113,10 @@ end
 %Rotate about z axis
 direction = [0 0 1];
 for k = 1:M+1
-    v = [zOpt(1,k)-VehicleParams.lr, zOpt(2,k)-VehicleParams.trackWidth/2;...
-        zOpt(1,k)-VehicleParams.lr, zOpt(2,k)+VehicleParams.trackWidth/2;...
-         zOpt(1,k)+VehicleParams.lf, zOpt(2,k)+VehicleParams.trackWidth/2; ...
-        zOpt(1,k)+VehicleParams.lf, zOpt(2,k)-VehicleParams.trackWidth/2];
+    v = [zOpt(1,k)-VehicleParams.lrl, zOpt(2,k)-VehicleParams.trackWidth/2;...
+        zOpt(1,k)-VehicleParams.lrl, zOpt(2,k)+VehicleParams.trackWidth/2;...
+         zOpt(1,k)+VehicleParams.lfl, zOpt(2,k)+VehicleParams.trackWidth/2; ...
+        zOpt(1,k)+VehicleParams.lfl, zOpt(2,k)-VehicleParams.trackWidth/2];
     veh = patch('Vertices',v, 'Faces',[1 2 3 4], 'EdgeColor', 'black', 'FaceColor', 'none');
     rotate(veh, direction, zOpt(4,k)*180/pi, [zOpt(1,k), zOpt(2,k),0]);
 end

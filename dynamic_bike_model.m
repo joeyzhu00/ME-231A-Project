@@ -1,4 +1,4 @@
-function zOut = vehicle_dynamics(z, u, sampleTime, VehicleParams)
+function zOut = dynamic_bike_model(z, u, sampleTime, VehicleParams)
 % Function representing the dynamic bicycle model to update the state
 % feedback
 %
@@ -34,7 +34,7 @@ function zOut = vehicle_dynamics(z, u, sampleTime, VehicleParams)
 % OUTPUTS:
 %      zOut - double (4x1)
 %            Updated state trajectory
-
+zOut = sdpvar(4,1);
 % global frame kinematics/dynamics
 yawRate = z(3)*sin(u(2))/(VehicleParams.bf+VehicleParams.br);
 xVelocity = z(3)*cos(z(4)+u(2));
