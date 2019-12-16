@@ -34,6 +34,18 @@ ObstacleParams(2).bounds = [-1.5, 1.5, -0.5, 0.5]; % [m]
 % ObstacleParams(3).centroids = [120; -1.5]; % [m]
 % ObstacleParams(3).bounds = [-1, 1, -1, 1]; % [m]
 
+% % coordinates of the obstacle centroid (x,y)
+% ObstacleParams(1).centroids = [110; 0]; % [m]
+% % obstacle vertex boundaries (assuming everything is rectangular)
+% % [xMin, xMax, yMin, yMax]
+% ObstacleParams(1).bounds = [-1, 1, -0.5, 0.5]; % [m]
+% 
+% ObstacleParams(2).centroids = [110; 1.5]; % [m]
+% ObstacleParams(2).bounds = [-1, 1, -0.5, 0.5]; % [m]
+% 
+% ObstacleParams(3).centroids = [120; -1.5]; % [m]
+% ObstacleParams(3).bounds = [-1, 1, -1, 1]; % [m]
+
 %%%%%%%%%%%%%%%%%%%%%%
 % Vehicle Dimensions %
 %%%%%%%%%%%%%%%%%%%%%%
@@ -65,7 +77,7 @@ sampleTime = 0.1; % [sec]
 % MPC Horizon
 M = 30;
 % CFTOC Horizon
-N = 7;
+N = 5;
 % initial conditions
 % [x-pos; y-pos; speed; vehicle heading]
 z0 = [0; 0; 30; 0]; % [m; m; m/s; rad]
@@ -80,19 +92,19 @@ tic
 toc
 %% Do some plotting
 close all
-%High level open loop predictions
-figure("Name", "High Level Open Loop Predictions")
-for i = 1:M
-    plot(pursuitPoints(1,:,i), pursuitPoints(2,:,i))
-    hold on
-end
-for k = 1:length(ObstacleParams)
-    rectangle('Position', [ObstacleParams(k).centroids(1)+ObstacleParams(k).bounds(1), ObstacleParams(k).centroids(2)+ObstacleParams(k).bounds(3), ...
-                          -ObstacleParams(k).bounds(1)+ObstacleParams(k).bounds(2), -ObstacleParams(k).bounds(3)+ObstacleParams(k).bounds(4)]);
-    plot(ObstacleParams(k).centroids(1), ObstacleParams(k).centroids(2), 'o');
-end
-xlabel('X-Position [m]');
-ylabel('Y-Position [m]');
+% % High level open loop predictions
+% figure("Name", "High Level Open Loop Predictions")
+% for i = 1:M
+%     plot(pursuitPoints(1,:,i), pursuitPoints(2,:,i))
+%     hold on
+% end
+% for k = 1:length(ObstacleParams)
+%     rectangle('Position', [ObstacleParams(k).centroids(1)+ObstacleParams(k).bounds(1), ObstacleParams(k).centroids(2)+ObstacleParams(k).bounds(3), ...
+%                           -ObstacleParams(k).bounds(1)+ObstacleParams(k).bounds(2), -ObstacleParams(k).bounds(3)+ObstacleParams(k).bounds(4)]);
+%     plot(ObstacleParams(k).centroids(1), ObstacleParams(k).centroids(2), 'o');
+% end
+% xlabel('X-Position [m]');
+% ylabel('Y-Position [m]');
 
 % Path, Speed, and heading angle
 time = 0:sampleTime:sampleTime*length(zOpt)-sampleTime;

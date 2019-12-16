@@ -1,4 +1,4 @@
-function [minDistance, minObstaclePoint] = min_distance_calc(zOpt, uOpt, VehicleParams, N, sampleTime, ObstacleParams)
+function [minDistance, minObstaclePoint] = min_distance_calc(zOpt, ~, VehicleParams, ~, ~, ObstacleParams)
 % Calculate the minimum distance from the vehicle to the object(s) in the
 % body frame. 
 %
@@ -84,9 +84,9 @@ for p = 1:size(ObstacleParams,2)
     
     obstacleDist = zeros(length(obstaclePositions),1);
     for j = 1:length(obstaclePositions)
-        if (abs(posBody(j,2)) <= VehicleParams.trackWidth/2) && (posBody(j,1) > VehicleParams.lf)
-            obstacleDist(j,1) = posBody(j,1) - VehicleParams.lf;
-        elseif (abs(posBody(j,2)) <= VehicleParams.trackWidth/2) && (posBody(j,1) >= -VehicleParams.lr) && (posBody(j,1) <= VehicleParams.lf)
+        if (abs(posBody(j,2)) <= VehicleParams.trackWidth/2) && (posBody(j,1) > VehicleParams.lfl)
+            obstacleDist(j,1) = posBody(j,1) - VehicleParams.lfl;
+        elseif (abs(posBody(j,2)) <= VehicleParams.trackWidth/2) && (posBody(j,1) >= -VehicleParams.lrl) && (posBody(j,1) <= VehicleParams.lfl)
             obstacleDist(j,1) = 0;
         else
             % arbitrarily high value

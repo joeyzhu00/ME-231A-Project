@@ -96,26 +96,32 @@ pursuitPoints = zeros(nz, N+1, M);
 % initial conditions
 zOpt(:,1) = z0;
 uOpt(:,1) = [0;0];
+
+figure()
+
 for i = 1:M
     fprintf('Working on MPC Iteration #%d \n', i);
     % find the point to pursue
 %     pursuitPoint = find_pursuit_point(zOpt(:,i), uOpt, VehicleParams, vehiclePath, N, sampleTime);
     IneqConstraints.zMin = [zOpt(1,i); -6; 0; -2*pi];
     
+    % calculate the minimum distance from the vehicle to the object(s) in
+    % the body frame
+    [minDistance, minObstaclePoint] = min_distance_calc(zOpt(:,i), [], VehicleParams, [], [], ObstacleParams);
+
+    % find the point to pursue
+    pursuitPoint = find_pursuit_point(zOpt(:,i), uOpt, VehicleParams, vehiclePath, N, sampleTime);
     % do the high-level MPC to figure out the path
-    [planFeas(i), zSpatial, ~, ~] = cftoc_kinematic_bike_spatial(N, zOpt(:,i), sampleTime, VehicleParams, IneqConstraints, ObstacleParams, rhoS, avoidTune, trackTune);
+%     [planFeas(i), zSpatial, ~, ~] = cftoc_kinematic_bike_spatial(N, zOpt(:,i), sampleTime, VehicleParams, IneqConstraints, ObstacleParams, rhoS, avoidTune, trackTune);
 
-    if ~planFeas(i)
-        disp('High Level infeasible region reached!');
-        return;
-    end
-    pursuitPoints(:,:,i) = zSpatial;
-
-    %display(zSpatial)
+%     if ~planFeas(i)
+%         disp('High Level infeasible region reached!');
+%         return;
+%     end
+%     pursuitPoints(:,:,i) = zSpatial;
     
     % lower state constraint is dynamic
-    % solve the cftoc problem for a kinematic bicycle model and run in "open-loop"
-    [feas(i), z, u, cost] = cftoc_path_following(N, zOpt(:,i), sampleTime, VehicleParams, IneqConstraints, pursuitPoints(:,:,i));
+    [feas(i), z, u, cost] = cftoc_path_following(N, z0, sampleTime, VehicleParams, IneqConstraints, pursuitPoint, minDistance, minObstaclePoint);
     
     if ~feas(i)
         disp('Infeasible region reached!');
@@ -127,7 +133,6 @@ for i = 1:M
 %     zOpt(:,i+1) = z(:,2);
     % update state dynamics with the dynamic bicycle model
     zOpt(:,i+1) = dynamic_vehicle_model(zOpt(:,i), uOpt(:,i), sampleTime, VehicleParams);
-    
     
     % exit the for loop if the vehicle positions are within the stopCondition threshold
     if (abs(zOpt(1,i+1)-vehiclePath(1,end)) <= stopCondition) && (abs(zOpt(2,i+1)-vehiclePath(2,end)) <= stopCondition)
