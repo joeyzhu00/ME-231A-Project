@@ -76,11 +76,11 @@ IneqConstraints.longAccelRange = 0.06; % [m/s^2]
 % algorithm is persistently feasible :(. It is not in certain conditions. 
 % THERE IS POSSIBILITY TO HEAD STRAIGHT FOR OBSTACLE IF N IS NOT LONG
 % ENOUGH TO "SEE" IT IN THE CFTOC. DISCUSS THIS IN PAPER WRITE UP!
-avoidTune = 3.0;
+avoidTune = 1;
 
 % Tune how closely the vehicle track the path. Higher is aggressive
 % tracking
-trackTune = 1.5;
+trackTune = 0.2;
 
 
 %Path - ALMOST STRAIGHT LINE 
