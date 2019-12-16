@@ -75,7 +75,7 @@ stopCondition = 10; % [m]
 
 tic
 % do the MPC
-[feas, zOpt, uOpt, JOpt, pursuitPoints] = mpc_kinematic_bike(M, N, z0, vehiclePath, sampleTime, VehicleParams, stopCondition, ObstacleParams);
+[feas, zOpt, uOpt, JOpt, pursuitPoints] = mpc_two_level(M, N, z0, vehiclePath, sampleTime, VehicleParams, stopCondition, ObstacleParams);
 toc
 %% Do some plotting
 close all

@@ -1,4 +1,4 @@
-function [feas, zOpt, uOpt, JOpt, pursuitPoints] = mpc_kinematic_bike(M, N, z0, vehiclePath, sampleTime, VehicleParams, stopCondition, ObstacleParams)
+function [feas, zOpt, uOpt, JOpt, pursuitPoints] = mpc_two_level(M, N, z0, vehiclePath, sampleTime, VehicleParams, stopCondition, ObstacleParams)
 % Function to facilitate MPC for the kinematic bicycle to track a global
 % path. The lower state constraints are currently static to force the
 % vehicle to keep moving along the path. An obstacle avoidance cost is
@@ -115,7 +115,7 @@ for i = 1:M
     
     % lower state constraint is dynamic
     % solve the cftoc problem for a kinematic bicycle model and run in "open-loop"
-    [feas(i), z, u, cost] = cftoc_kinematic_bike(N, zOpt(:,i), sampleTime, VehicleParams, IneqConstraints, pursuitPoints(:,:,i));
+    [feas(i), z, u, cost] = cftoc_path_following(N, zOpt(:,i), sampleTime, VehicleParams, IneqConstraints, pursuitPoints(:,:,i));
     
     if ~feas(i)
         disp('Infeasible region reached!');
@@ -126,7 +126,7 @@ for i = 1:M
     JOpt(:,i) = cost;
 %     zOpt(:,i+1) = z(:,2);
     % update state dynamics with the dynamic bicycle model
-    zOpt(:,i+1) = dynamic_bike_model(zOpt(:,i), uOpt(:,i), sampleTime, VehicleParams);
+    zOpt(:,i+1) = dynamic_vehicle_model(zOpt(:,i), uOpt(:,i), sampleTime, VehicleParams);
     
     
     % exit the for loop if the vehicle positions are within the stopCondition threshold

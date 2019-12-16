@@ -1,4 +1,4 @@
-function [feas, zOpt, uOpt, JOpt] = cftoc_kinematic_bike(N, z0, sampleTime, VehicleParams, IneqConstraints, pursuitPoint)
+function [feas, zOpt, uOpt, JOpt] = cftoc_path_following(N, z0, sampleTime, VehicleParams, IneqConstraints, pursuitPoint)
 % Function to solve the constrained finite time optimal control problem
 % with a kinematic bicycle model to track a global path.
 %
@@ -66,7 +66,7 @@ for i = 1:N
     constraints = [constraints, ...
                    IneqConstraints.zMin <= z(:,i) <= IneqConstraints.zMax, ...         % state constraints
                    IneqConstraints.uMin <= u(:,i) <= IneqConstraints.uMax, ...         % input constraints
-                   z(:,i+1) == dynamic_bike_model(z(:,i), u(:,i), sampleTime, VehicleParams)]; % state dynamics
+                   z(:,i+1) == dynamic_vehicle_model(z(:,i), u(:,i), sampleTime, VehicleParams)]; % state dynamics
     if i <= N-1
         % input constraints up to N-1
         constraints = [constraints, ...
