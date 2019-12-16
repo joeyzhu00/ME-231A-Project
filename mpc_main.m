@@ -1,5 +1,5 @@
 %% Script to Simulate Autonomous Vehicle on Highway With a Bicycle Model
-clc,clear,close all
+clc,clear,close all,yalmip('clear')
 
 %% Vehicle/Path/Obstacle Parameters
 %%%%%%%%%%%%%%%%
@@ -75,11 +75,24 @@ stopCondition = 10; % [m]
 
 tic
 % do the MPC
+% some animation
+figure("Name", "Animation")
+plot(vehiclePath(1,:), vehiclePath(2,:));
+hold on
+axis([0  200  -8  4]);
+% plot the obstacles
+for k = 1:length(ObstacleParams)
+    rectangle('Position', [ObstacleParams(k).centroids(1)+ObstacleParams(k).bounds(1), ObstacleParams(k).centroids(2)+ObstacleParams(k).bounds(3), ...
+                          -ObstacleParams(k).bounds(1)+ObstacleParams(k).bounds(2), -ObstacleParams(k).bounds(3)+ObstacleParams(k).bounds(4)]);
+    plot(ObstacleParams(k).centroids(1), ObstacleParams(k).centroids(2), 'o');
+end
+refreshdata
+drawnow
 [feas, zOpt, uOpt, JOpt, pursuitPoints] = mpc_two_level(M, N, z0, vehiclePath, sampleTime, VehicleParams, stopCondition, ObstacleParams);
 toc
 %% Do some plotting
 close all
-%High level open loop predictions
+%% High level open loop predictions
 figure("Name", "High Level Open Loop Predictions")
 for i = 1:M
     plot(pursuitPoints(1,:,i), pursuitPoints(2,:,i))
@@ -92,8 +105,7 @@ for k = 1:length(ObstacleParams)
 end
 xlabel('X-Position [m]');
 ylabel('Y-Position [m]');
-
-% Path, Speed, and heading angle
+%% Path, Speed, and heading angle
 time = 0:sampleTime:sampleTime*length(zOpt)-sampleTime;
 figure("Name", "Vehicle Path, Speed, and Heading Angle")
 subplot(3,1,1);
@@ -141,7 +153,7 @@ grid on
 xlabel('Time [sec]');
 ylabel('Heading Angle [rad]');
 title('Vehicle Heading Angle');
-
+%%
 inputTime = time(1:end-1);
 figure("Name", "Vehicle Acceleration, Steering, and Cost")
 subplot(3,1,1);

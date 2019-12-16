@@ -96,6 +96,8 @@ pursuitPoints = zeros(nz, N+1, M);
 % initial conditions
 zOpt(:,1) = z0;
 uOpt(:,1) = [0;0];
+
+
 for i = 1:M
     fprintf('Working on MPC Iteration #%d \n', i);
     % find the point to pursue
@@ -110,13 +112,13 @@ for i = 1:M
         return;
     end
     pursuitPoints(:,:,i) = zSpatial;
-
+    planned_path = plot(pursuitPoints(1,:,i), pursuitPoints(2,:,i), 'color', 'g');
     %display(zSpatial)
     
     % lower state constraint is dynamic
     % solve the cftoc problem for a kinematic bicycle model and run in "open-loop"
     [feas(i), z, u, cost] = cftoc_path_following(N, zOpt(:,i), sampleTime, VehicleParams, IneqConstraints, pursuitPoints(:,:,i));
-    
+    plot(z(1,1), z(2,1), 'o', 'color', 'r', 'MarkerSize', 4);
     if ~feas(i)
         disp('Infeasible region reached!');
         return
@@ -127,13 +129,18 @@ for i = 1:M
 %     zOpt(:,i+1) = z(:,2);
     % update state dynamics with the dynamic bicycle model
     zOpt(:,i+1) = dynamic_vehicle_model(zOpt(:,i), uOpt(:,i), sampleTime, VehicleParams);
-    
-    
+    next_position = plot(zOpt(1,i+1), zOpt(2,i+1), '.', 'color', 'b', 'MarkerSize', 8);
+    arrow = quiver(z(1,1),z(2,1),(zOpt(1,i+1)-z(1,1)),(zOpt(2,i+1)-z(2,1)),0);
+    refreshdata
+    drawnow
     % exit the for loop if the vehicle positions are within the stopCondition threshold
     if (abs(zOpt(1,i+1)-vehiclePath(1,end)) <= stopCondition) && (abs(zOpt(2,i+1)-vehiclePath(2,end)) <= stopCondition)
         disp('Reached the end of the path');
         break;
     end
+    delete(planned_path);
+    delete(arrow);
+    delete(next_position);
 end
 
 end
