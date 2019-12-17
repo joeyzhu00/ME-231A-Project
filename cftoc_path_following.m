@@ -81,7 +81,7 @@ for i = 1:N
     constraints = [constraints, ...
                    IneqConstraints.zMin - v <= z(:,i) <= IneqConstraints.zMax + v, ...         % state constraints
                    IneqConstraints.uMin <= u(:,i) <= IneqConstraints.uMax, ...         % input constraints
-                   z(:,i+1) == dynamic_vehicle_model(z(:,i), u(:,i), sampleTime, VehicleParams)]; % state dynamics
+                   z(:,i+1) == bike_model(z(:,i), u(:,i), sampleTime)]; % state dynamics
     if i <= CH
         % input constraints up to N-1
         constraints = [constraints, ...
