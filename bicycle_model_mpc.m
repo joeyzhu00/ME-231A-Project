@@ -1,5 +1,5 @@
 %% Script to Simulate Autonomous Vehicle on Highway With a Bicycle Model
-clc,clear,close all
+clc,clear,close all,yalmip('clear')
 
 %% Vehicle/Path/Obstacle Parameters
 %%%%%%%%%%%%%%%%
