@@ -130,7 +130,7 @@ for i = 1:M
     % update state dynamics with the dynamic bicycle model
     zOpt(:,i+1) = dynamic_vehicle_model(zOpt(:,i), uOpt(:,i), sampleTime, VehicleParams);
     next_position = plot(zOpt(1,i+1), zOpt(2,i+1), '.', 'color', 'b', 'MarkerSize', 8);
-    arrow = quiver(z(1,1),z(2,1),(zOpt(1,i+1)-z(1,1)),(zOpt(2,i+1)-z(2,1)),0);
+    arrow = quiver(z(1,1),z(2,1),(z(1,2)-z(1,1)),(z(2,2)-z(2,1)),0,'MarkerSize', 8);
     refreshdata
     drawnow
     % exit the for loop if the vehicle positions are within the stopCondition threshold
