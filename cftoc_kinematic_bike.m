@@ -42,6 +42,14 @@ function [feas, zOpt, uOpt, JOpt] = cftoc_kinematic_bike(N, z0, sampleTime, Vehi
 %      JOpt - double (1,N)
 %          cost
 
+% action weight
+Ka = [0 0;0 0];
+% output soft constraint weight
+Kstate = [1 0 0 0;
+          0 1 0 0;
+          0 0 1 0;
+          0 0 0 1];
+
 % number of states
 nz = length(z0);
 % number of inputs [longitudinal accel; steering angle]
@@ -60,11 +68,9 @@ constraints = z(:,1) == z0;
 cost = 0;
 % only apply cost for the last 4 points
 for i = N:-1:N-3
-    cost = cost + norm(z(:,i)-pursuitPoint(:,i))^2;
+    cost = cost + norm(Kstate * (z(:,i)-pursuitPoint(:,i)))^2;
 end
 % only account for the first few actions
-% action weight
-Ka = [1 0;0 1];
 for i = 1:CH
     if i == 1
         cost = cost + norm(Ka * u(:,i))^2;
@@ -74,9 +80,7 @@ for i = 1:CH
 end
 
 % add soft constraint
-% output soft constraint weight
-Ko = 1;
-cost = cost + Ko / 2 * norm(v,1)^2 + Ko * norm(v,1);
+cost = cost + 0.5 * norm(v,1)^2 + norm(v,1);
 
 % loop through the horizon
 for i = 1:N
