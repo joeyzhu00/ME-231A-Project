@@ -63,16 +63,20 @@ for i = N:-1:N-3
     cost = cost + norm(z(:,i)-pursuitPoint(:,i))^2;
 end
 % only account for the first few actions
+% action weight
+Ka = [1 0;0 1];
 for i = 1:CH
     if i == 1
-        cost = cost + norm(u(:,i))^2;
+        cost = cost + norm(Ka * u(:,i))^2;
     else
-        cost = cost + norm(u(:,i) - u(:,i-1))^2;
+        cost = cost + norm(Ka * (u(:,i) - u(:,i-1)))^2;
     end
 end
 
 % add soft constraint
-cost = cost + 0.5 * norm(v,1)^2 + norm(v,1);
+% output soft constraint weight
+Ko = 1;
+cost = cost + Ko / 2 * norm(v,1)^2 + Ko * norm(v,1);
 
 % loop through the horizon
 for i = 1:N
